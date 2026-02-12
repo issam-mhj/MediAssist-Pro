@@ -11,7 +11,9 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     OPENAI_API_KEY: Optional[str] = None
-    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    LLAMA_CLOUD_API_KEY: Optional[str] = None
+    OLLAMA_BASE_URL: str = "http://ollama:11434"
+    OLLAMA_MODEL: str = "llama3.2"
     EMBEDDINGS_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
     VECTOR_STORE_TYPE: str = "qdrant"
     QDRANT_PERSIST_DIRECTORY: str = "./qdrant_data"
@@ -23,5 +25,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = str(_env_file)
+        extra = "ignore"
 
 settings = Settings()

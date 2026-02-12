@@ -1,166 +1,161 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+import re
 from typing import List, Optional
+
+from langchain_text_splitters import (
+    MarkdownHeaderTextSplitter,
+    RecursiveCharacterTextSplitter,
+)
 from langchain_core.documents import Document
-
-try:
-    from langchain_experimental.text_splitter import SemanticChunker
-    from langchain_community.embeddings import HuggingFaceEmbeddings
-    SEMANTIC_AVAILABLE = True
-except ImportError:
-    SEMANTIC_AVAILABLE = False
-
-from app.rag.document_processor import load_documents
 
 
 class DocumentChunker:
-    
-    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
+
+    def __init__(self, chunk_size: int = 1200, chunk_overlap: int = 200):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-    
-    def create_semantic_chunks(
-        self,
-        documents: List[Document],
-        breakpoint_threshold_type: str = "percentile"
-    ) -> List[Document]:
-        print("\nCréation de chunks sémantiques...")
 
-        if not SEMANTIC_AVAILABLE:
-            return self.create_character_chunks(documents)
+        self._md_headers = [
+            ("#", "heading_1"),
+            ("##", "heading_2"),
+            ("###", "heading_3"),
+        ]
 
-        embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={'device': 'cpu'}
-        )
-        
-        text_splitter = SemanticChunker(
-            embeddings=embeddings,
-            breakpoint_threshold_type=breakpoint_threshold_type
-        )
-        
-        chunks = text_splitter.split_documents(documents)
-        
-        for i, chunk in enumerate(chunks, start=1):
-            chunk.metadata["chunk_id"] = i
-            chunk.metadata["chunk_type"] = "semantic"
-            chunk.metadata["char_count"] = len(chunk.page_content)
-        
-        print(f"✅ {len(chunks)} chunks sémantiques créés")
-        
-        return chunks
-    
+
     def create_character_chunks(
         self,
         documents: List[Document],
-        separators: Optional[List[str]] = None
+        separators: Optional[List[str]] = None,
     ) -> List[Document]:
-        print("\n📏 Création de chunks par caractères...")
-        
-        if separators is None:
-            separators = [
-                "\n\n", 
-                "\n",    
-                ". ",    
-                ", ",    
-                " ",     
-                ""       
-            ]
-        
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=self.chunk_size,
-            chunk_overlap=self.chunk_overlap,
-            separators=separators,
-            length_function=len,
-            is_separator_regex=False
-        )
-        
-        chunks = text_splitter.split_documents(documents)
-        
-        for i, chunk in enumerate(chunks, start=1):
+        print("\nCréation de chunks structurés...")
+
+        all_chunks: List[Document] = []
+
+        for doc in documents:
+            page_chunks = self._split_single_document(doc, separators)
+            all_chunks.extend(page_chunks)
+
+        for i, chunk in enumerate(all_chunks, start=1):
             chunk.metadata["chunk_id"] = i
-            chunk.metadata["chunk_type"] = "character"
             chunk.metadata["char_count"] = len(chunk.page_content)
-            chunk.metadata["chunk_size"] = self.chunk_size
-            chunk.metadata["chunk_overlap"] = self.chunk_overlap
-        
-        print(f" {len(chunks)} chunks créés")
-        print(f"   Taille moyenne: {sum(len(c.page_content) for c in chunks) / len(chunks):.0f} caractères")
-        
-        return chunks
-    
-    def create_hybrid_chunks(
-        self,
-        documents: List[Document],
-        use_semantic: bool = True
-    ) -> List[Document]:
-        print("\n🔄 Création de chunks hybrides...")
-        
-        if use_semantic:
-            chunks = self.create_semantic_chunks(documents)
-            
-            final_chunks = []
-            for chunk in chunks:
-                if len(chunk.page_content) > self.chunk_size * 1.5:
-                    sub_chunks = self.create_character_chunks([chunk])
-                    final_chunks.extend(sub_chunks)
-                else:
-                    final_chunks.append(chunk)
-            
-            print(f"✅ {len(final_chunks)} chunks hybrides créés")
-            return final_chunks
+
+        if all_chunks:
+            avg = sum(len(c.page_content) for c in all_chunks) / len(all_chunks)
+            print(f"  {len(all_chunks)} chunks créés")
+            print(f"     Taille moyenne: {avg:.0f} caractères")
         else:
-            return self.create_character_chunks(documents)
-    
+            print("  Aucun chunk créé")
+
+        return all_chunks
+
     def get_chunk_stats(self, chunks: List[Document]) -> dict:
         if not chunks:
             return {}
-        
-        chunk_lengths = [len(chunk.page_content) for chunk in chunks]
-        
+        lengths = [len(c.page_content) for c in chunks]
         return {
             "total_chunks": len(chunks),
-            "min_length": min(chunk_lengths),
-            "max_length": max(chunk_lengths),
-            "avg_length": sum(chunk_lengths) / len(chunk_lengths),
-            "total_chars": sum(chunk_lengths),
-            "chunk_type": chunks[0].metadata.get("chunk_type", "unknown")
+            "min_length": min(lengths),
+            "max_length": max(lengths),
+            "avg_length": round(sum(lengths) / len(lengths)),
+            "total_chars": sum(lengths),
+            "chunk_size_setting": self.chunk_size,
+            "chunk_overlap_setting": self.chunk_overlap,
         }
 
+    def _split_single_document(
+        self,
+        doc: Document,
+        separators: Optional[List[str]] = None,
+    ) -> List[Document]:
+        text = doc.page_content
+        base_meta = dict(doc.metadata)
 
-if __name__ == "__main__":
-    print("\n" + "="*50)
-    print("TEST DU DOCUMENT CHUNKER")
-    print("="*50 + "\n")
-    
-    print("📥 Chargement des documents...")
-    documents = load_documents()
-    
-    if not documents:
-        print(" Aucun document chargé")
-        exit(1)
-    
-    print(f"✅ {len(documents)} documents chargés\n")
-    
-    chunker = DocumentChunker(chunk_size=1000, chunk_overlap=200)
-    
-    print("\n" + "="*50)
-    print("TEST: Chunking par caractères")
-    print("="*50)
-    char_chunks = chunker.create_character_chunks(documents)
-    char_stats = chunker.get_chunk_stats(char_chunks)
-    
-    print("\nStatistiques des chunks par caractères:")
-    for key, value in char_stats.items():
-        print(f"  {key}: {value}")
-    
-    if char_chunks:
-        print("\n📄 Aperçu du premier chunk:")
-        print(f"  ID: {char_chunks[0].metadata.get('chunk_id')}")
-        print(f"  Page source: {char_chunks[0].metadata.get('page')}")
-        print(f"  Longueur: {len(char_chunks[0].page_content)} caractères")
-        print(f"\n  Contenu (150 premiers caractères):\n")
-        print(f"  {char_chunks[0].page_content[:150]}...")
-    
-    print("\n" + "="*50)
-    print("Tests terminés avec succès")
-    print("="*50 + "\n")
+        tables, text = self._extract_tables(text)
+
+        md_splitter = MarkdownHeaderTextSplitter(
+            headers_to_split_on=self._md_headers,
+            strip_headers=False,
+        )
+        md_sections = md_splitter.split_text(text)
+
+        if not md_sections:
+            md_sections = [Document(page_content=text, metadata={})]
+
+        sub_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+            separators=separators or [
+                "\n\n",   
+                "\n",     
+                ". ",     
+                "; ",     
+                ", ",     
+                " ",     
+                "",      
+            ],
+            length_function=len,
+            is_separator_regex=False,
+        )
+
+        chunks: List[Document] = []
+
+        for section in md_sections:
+            sec_text = section.page_content.strip()
+            if not sec_text:
+                continue
+
+            ctx_header = self._build_context_header(base_meta, section.metadata)
+
+            if len(sec_text) <= self.chunk_size:
+                content = f"{ctx_header}\n\n{sec_text}" if ctx_header else sec_text
+                meta = {**base_meta, **section.metadata, "chunk_type": "structured"}
+                chunks.append(Document(page_content=content, metadata=meta))
+            else:
+                sub_docs = sub_splitter.split_text(sec_text)
+                for part in sub_docs:
+                    content = f"{ctx_header}\n\n{part}" if ctx_header else part
+                    meta = {**base_meta, **section.metadata, "chunk_type": "structured"}
+                    chunks.append(Document(page_content=content, metadata=meta))
+
+        for table_text in tables:
+            ctx = self._build_context_header(base_meta, {})
+            content = f"{ctx}\n\n{table_text}" if ctx else table_text
+            meta = {**base_meta, "chunk_type": "table"}
+            chunks.append(Document(page_content=content, metadata=meta))
+
+        return chunks
+
+    @staticmethod
+    def _extract_tables(text: str):
+        table_pattern = re.compile(
+            r"((?:^\|.+\|\s*$\n?){2,})",
+            re.MULTILINE,
+        )
+        tables: List[str] = []
+        for m in table_pattern.finditer(text):
+            table = m.group(0).strip()
+            if table:
+                tables.append(table)
+
+        cleaned = table_pattern.sub("\n\n", text)
+        return tables, cleaned
+
+    @staticmethod
+    def _build_context_header(base_meta: dict, section_meta: dict) -> str:
+        parts: List[str] = []
+
+        chapter = base_meta.get("chapter")
+        if chapter:
+            parts.append(chapter)
+
+        for key in ("heading_1", "heading_2", "heading_3"):
+            val = section_meta.get(key)
+            if val:
+                parts.append(val)
+
+        section = base_meta.get("section")
+        if section and section not in parts:
+            parts.append(section)
+
+        if not parts:
+            return ""
+        return "[" + " > ".join(parts) + "]"

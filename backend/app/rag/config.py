@@ -16,13 +16,14 @@ class RAGConfig:
 
     QDRANT_DB_DIR = RAG_DIR.parent.parent / "qdrant_data"
     
-    CHAR_CHUNK_SIZE = 1000
+    CHAR_CHUNK_SIZE = 1200
     CHAR_CHUNK_OVERLAP = 200
     
     CHUNK_SEPARATORS = [
-        "\n\n",     
-        "\n",       
+        "\n\n",      
+        "\n",        
         ". ",       
+        "; ",       
         ", ",       
         " ",        
         ""          
