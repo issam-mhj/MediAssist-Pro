@@ -1,0 +1,39 @@
+Timestamp: 2026-02-12T09:52:30.143597
+Top-K: 3
+Latency: 28.445s
+
+Question:
+What is diabetes?
+
+Answer:
+Je ne trouve pas cette information dans les manuels techniques disponibles.
+
+La question "What is diabetes?" demande une définition de la maladie diabétique, qui n'est pas explicitement mentionnée dans le contexte fourni. Les informations fournies concernent des équipements biomédicaux de laboratoire, tels que des enceintes de sécurité biologique et leurs codes GMDN/ECRI, ainsi que des paramètres physico-chimiques tels que les valeurs du pH pour différents liquides.
+
+Sources:
+  - maintenance-des-appareils-de-laboratoire.pdf (Page 36)
+  - maintenance-des-appareils-de-laboratoire.pdf (Page 13)
+  - maintenance-des-appareils-de-laboratoire.pdf (Page 43)
+
+Context:
+[Chapitre 6]
+
+| Code GMDN | 15698 | 20652 | 20653 | 20654 |
+|-----------|-------|-------|-------|-------|
+| Code ECRI | 15-698 | 20-652 | 20-653 | 20-654 |
+| Dénomination | Enceintes de sécurité biologique | Enceintes de sécurité biologique, classe I | Enceintes de sécurité biologique, classe II | Enceintes de sécurité biologique, classe III |
+
+[Chapitre 3]
+
+| Liquide | Valeur du pH |
+| Bile | 7,8 – 8,6 |
+| Salive | 6,4 – 6,8 |
+| Urine | 5,5 – 7,0 |
+| Suc gastrique | 1,5 – 1,8 |
+| Sang | 7,35 – 7,45 |
+
+[CHAPITRE 6 ENCEINTE DE SÉCURITÉ BIOLOGIQUE]
+
+| Paramètres | Observation |
+|------------|-------------|
+| Identification de l'enceinte par l'établissement | Marque, modèle, type, série, emplacement, code inventaire, date. |

@@ -13,12 +13,10 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    # Check if user exists
     db_user = db.query(User).filter(User.username == user.username).first()
     if db_user:
         raise UserAlreadyExistsException()
     
-    # Check if email exists
     db_email = db.query(User).filter(User.email == user.email).first()
     if db_email:
         raise HTTPException(
@@ -26,7 +24,6 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Create new user
     hashed_password = get_password_hash(user.password)
     new_user = User(
         username=user.username,

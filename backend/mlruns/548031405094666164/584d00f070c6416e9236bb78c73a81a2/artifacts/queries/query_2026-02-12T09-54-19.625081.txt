@@ -1,0 +1,46 @@
+Timestamp: 2026-02-12T09:54:19.625081
+Top-K: 5
+Latency: 18.418s
+
+Question:
+who is ronaldo?
+
+Answer:
+Je ne trouve pas cette information dans les manuels techniques disponibles. La question "Qui est Ronaldo?" n'est pas liée au contexte du maintenance des appareils de laboratoire et ne peut être répondue en fonction des informations fournies.
+
+Sources:
+  - maintenance-des-appareils-de-laboratoire.pdf (Page 36)
+  - maintenance-des-appareils-de-laboratoire.pdf (Page 58)
+  - maintenance-des-appareils-de-laboratoire.pdf (Page 43)
+  - maintenance-des-appareils-de-laboratoire.pdf (Page 57)
+  - maintenance-des-appareils-de-laboratoire.pdf (Page 13)
+
+Context:
+[Chapitre 6 > Chapitre 6]
+
+# Chapitre 6
+
+[CHAPITRE 8 DISTILLATEUR > MANUEL D'ENTRETIEN ET DE MAINTENANCE DES APPAREILS DE LABORATOIRE]
+
+| Teneur en CaCO₃ en mg/l | Classification |
+|-------------------------|----------------|
+| 0-75 | eau douce |
+| 75-150 | eau mi-dure |
+| 150-300 | eau dure |
+| >300 | eau très dure |
+
+[CHAPITRE 6 ENCEINTE DE SÉCURITÉ BIOLOGIQUE]
+
+| Paramètres | Observation |
+|------------|-------------|
+| Identification de l'enceinte par l'établissement | Marque, modèle, type, série, emplacement, code inventaire, date. |
+
+[CHAPITRE 8 DISTILLATEUR > CHAPITRE 8 DISTILLATEUR > Stérilisation du récipient de stockage de l'eau distillée]
+
+8. Vider de nouveau le récipient de stockage.
+9. Remettre le filtre au charbon actif à sa place.
+10. Faire fonctionner le distillateur pour remplir le récipient d'eau distillée. Le filtre au charbon actif éliminera tous les résidus de chlore qui pourraient se trouver dans l'eau distillée.
+
+[Chapitre 3 > Chapitre 3 > pH mètre > A QUOI SERT UN PH-MÈTRE]
+
+. Les acides libèrent en permanence des ions hydrogène (H⁺) et l'organisme neutralise ou équilibre cette acidité en libérant des ions bicarbonate (HCO₃⁻). L'équilibre acido-basique est assuré par les reins (organes dans lesquels toute substance présente en excès est éliminée). Le pH plasmatique est l'un des paramètres qui se modifient sous l'effet de facteurs tels que l'âge ou l'état de santé du patient. Le tableau 1 présente les valeurs caractéristiques du pH de certains liquides biologiques.

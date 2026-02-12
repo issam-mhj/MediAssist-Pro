@@ -1,5 +1,3 @@
-"""Routes API pour le système RAG MediAssist-Pro."""
-
 import time
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -22,9 +20,6 @@ from app.monitoring.metrics import evaluate_rag_response
 router = APIRouter(prefix="/rag", tags=["RAG"])
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 def _get_pdf_files():
     """Return list of PDF paths found in the rag module folder."""
     pdf_files = list(RAGConfig.RAG_DIR.glob("*.pdf"))

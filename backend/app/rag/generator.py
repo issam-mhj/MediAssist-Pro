@@ -85,8 +85,8 @@ Réponse:"""
                 seen.add(key)
         return sources
 
-    def generate_answer(self, question: str) -> dict:
-        self.retriever_manager.top_k = 5
+    def generate_answer(self, question: str, top_k: int = 5) -> dict:
+        self.retriever_manager.top_k = top_k
 
         documents = self.retriever_manager.search(question)
 
